@@ -17,6 +17,6 @@ message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost version: ${Boost_VERSION}")
 
-add_executable(community_detection main.cpp)
+add_executable(community_detection src/main.cpp src/community_detector.cpp src/community_detector.h)
 
 target_link_libraries(community_detection Boost::boost)
