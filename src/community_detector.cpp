@@ -69,11 +69,24 @@ template <typename graph> bool has_edge_between_vertices(
     return edge(vd_1, vd_2, g).second;
 }
 
+template <typename graph> typename boost::graph_traits<graph>::edge_descriptor
+get_edge_between_vertices(
+        const typename boost::graph_traits<graph>::vertex_descriptor& vd_from,
+        const typename boost::graph_traits<graph>::vertex_descriptor& vd_to,
+        const graph& g
+        ) {
+    const auto er = edge(vd_from, vd_to, g);
+    if (!er.second) {
+        std::stringstream msg;
+        msg << "no_edge_between_these_vertices" << endl;
+        throw std::invalid_argument(msg.str());
+    }
+    return er.first;
+}
+
 community_detector::community_detector() {
 //    this->graph = create_empty_undirected_graph();
 }
-
-
 
 void community_detector::run() {
 
@@ -91,13 +104,16 @@ void community_detector::run() {
     int vertices = boost::num_vertices(graph);
     int edges = boost::num_edges(graph);
 
-
+    const auto edgoid = get_edge_between_vertices(vd_a, vd_b, graph);
+    cout << edgoid << endl;
     cout << "Vertices: " << vertices << endl << "Edges: " << edges << endl;
     cout << "Out degrees: ";
     for (int i : out_degrees) {
         cout << i << " ";
     }
     cout << endl;
+
+    cout << vd_a << " " << vd_b << " " << vd_c << " " << endl;
 
 
 }
