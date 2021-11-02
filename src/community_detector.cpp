@@ -1,7 +1,10 @@
 #include <iostream>
-#include "community_detector.h"
+#include <fstream>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/graphml.hpp>
+#include <boost/property_map/dynamic_property_map.hpp>
+#include "community_detector.h"
 using std::cout;
 using std::endl;
 
@@ -69,37 +72,48 @@ template <typename graph> bool has_edge_between_vertices(
     return edge(vd_1, vd_2, g).second;
 }
 
-community_detector::community_detector() {
-//    this->graph = create_empty_undirected_graph();
+template <typename graph> typename boost::graph_traits<graph>::edge_descriptor
+get_edge_between_vertices(
+        const typename boost::graph_traits<graph>::vertex_descriptor& vd_from,
+        const typename boost::graph_traits<graph>::vertex_descriptor& vd_to,
+        const graph& g
+        ) {
+    const auto er = edge(vd_from, vd_to, g);
+    if (!er.second) {
+        std::stringstream msg;
+        msg << "no_edge_between_these_vertices" << endl;
+        throw std::invalid_argument(msg.str());
+    }
+    return er.first;
 }
 
+// Reads in the football graph.
+void community_detector::read_graph(std::ifstream& input) {
+    boost::dynamic_properties dp;
+    dp.property("node_id", boost::get(&graph_node::node_id, graph));
+    dp.property("label", boost::get(&graph_node::label, graph));
+    dp.property("value", boost::get(&graph_node::value, graph));
 
+    boost::read_graphml(input, graph, dp);
+}
+
+community_detector::community_detector() {}
 
 void community_detector::run() {
 
+    std::ifstream football_input(R"(C:\cygwin64\home\Owner\classes\CS3353\21f-pa03-harrison_wood3\input\football.graphml)");
+    read_graph(football_input);
+    football_input.close();
 
-    graph = create_empty_undirected_graph();
-    const auto vd_a = boost::add_vertex(graph);
-    const auto vd_b = boost::add_vertex(graph);
-    const auto vd_c = boost::add_vertex(graph);
-    boost::add_edge(vd_a, vd_b, graph);
-    boost::add_edge(vd_b, vd_c, graph);
-    boost::add_edge(vd_c, vd_a, graph);
+    int f_vertices = boost::num_vertices(graph);
+    int f_edges = boost::num_edges(graph);
+    std::vector<int> f_out_degrees = get_vertex_out_degrees(graph);
 
-    std::vector<int> out_degrees = get_vertex_out_degrees(graph);
-
-    int vertices = boost::num_vertices(graph);
-    int edges = boost::num_edges(graph);
-
-
-    cout << "Vertices: " << vertices << endl << "Edges: " << edges << endl;
-    cout << "Out degrees: ";
-    for (int i : out_degrees) {
+    cout << "f_vertices: " << f_vertices << endl << "f_edges: " << f_edges << endl;
+    cout << "f_out_degrees: ";
+    for (int i : f_out_degrees) {
         cout << i << " ";
     }
     cout << endl;
 
-
 }
-
-
